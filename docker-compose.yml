@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  seismic-streamer:
+    build: .
+    container_name: seismic_streamer
+    pull_policy: build
+    environment:
+      - KAFKA_BROKER=${KAFKA_BROKER}
+      - KAFKA_CONSUME_TOPIC=${KAFKA_CONSUME_TOPIC}
+      - KAFKA_ZOOKEEPER_CONNECT=${KAFKA_ZOOKEEPER_CONNECT}
+      - KAFKA_CONSUMER_GROUP=${KAFKA_CONSUMER_GROUP}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_DB=${REDIS_DB}
+      - CLICKHOUSE_HOST=${CLICKHOUSE_HOST}
+      - CLICKHOUSE_DATABASE=${CLICKHOUSE_DATABASE}
+      - CLICKHOUSE_USER=${CLICKHOUSE_USER}
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD}
+    command: uvicorn main:app --host 0.0.0.0 --port 8014
+    ports:
+      - "8014:8014"
+    networks:
+      data-station-network:
+        ipv4_address: 172.20.14.95
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:alpine
+    container_name: weather_redis
+    restart: always
+    command: redis-server --save 60 1 --loglevel warning --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6381:6381"
+    networks:
+      data-station-network:
+        ipv4_address: 172.20.14.95
+
+volumes:
+  redis_data:
+
+networks:
+  data-station-network:
+    external: true

@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlalchemy[asyncio]
+aioredis
+clickhouse-driver
+confluent-kafka
+apscheduler
+python-dotenv
+aiokafka
+clickhouse-connect
+websockets
+orjson
+uvloop
