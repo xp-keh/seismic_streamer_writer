@@ -44,7 +44,7 @@ class AsyncConsumer:
                     "data": raw_data.get("data", 0.0)
                 }
 
-                key = f"seismic:{seismic_data['timestamp']}_{seismic_data['location']}"
+                key = f"seismic:{seismic_data['dt']}_{seismic_data['location']}"
 
                 await save_seismic_data(key, seismic_data)
                 try:
