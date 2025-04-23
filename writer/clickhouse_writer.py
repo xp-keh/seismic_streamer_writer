@@ -58,7 +58,7 @@ async def bulk_write_to_clickhouse():
         channel String,
         data Float32
     ) ENGINE = MergeTree()
-    ORDER BY timestamp
+    ORDER BY dt, channel
     """
     clickhouse_client.command(create_table_query)
 
