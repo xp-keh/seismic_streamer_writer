@@ -28,7 +28,7 @@ services:
 
   redis:
     image: redis:alpine
-    container_name: weather_redis
+    container_name: seismic_redis
     restart: always
     command: redis-server --save 60 1 --loglevel warning --appendonly yes
     volumes:
