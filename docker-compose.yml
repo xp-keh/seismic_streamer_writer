@@ -34,7 +34,7 @@ services:
     volumes:
       - redis_data:/data
     ports:
-      - "6381:6381"
+      - "6382:6382"
     networks:
       data-station-network:
         ipv4_address: 172.20.14.97
