@@ -22,7 +22,7 @@ services:
       - "8014:8014"
     networks:
       data-station-network:
-        ipv4_address: 172.20.14.95
+        ipv4_address: 172.20.14.96
     depends_on:
       - redis
 
@@ -37,7 +37,7 @@ services:
       - "6381:6381"
     networks:
       data-station-network:
-        ipv4_address: 172.20.14.95
+        ipv4_address: 172.20.14.97
 
 volumes:
   redis_data:
