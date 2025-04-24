@@ -68,6 +68,9 @@ class AsyncConsumer:
                         "data": data_point.get("data", 0.0)
                     }
 
+                    self.logger.info("Processed seismic data: %s", json.dumps(seismic_data))
+
+
                     key = f"seismic:{seismic_data['dt']}_{seismic_data['station']}_{seismic_data['channel']}"
                     await save_seismic_data(key, seismic_data)
 
