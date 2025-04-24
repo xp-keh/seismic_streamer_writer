@@ -57,7 +57,7 @@ class AsyncConsumer:
                 # except Exception as e:
                 #     self.logger.error(f"Error committing Kafka offset: {e}")
 
-                data_list = raw_data if isinstance(raw_data, list) else [raw_data]
+                data_list = raw_data.get("data","") if isinstance(raw_data.get("data",""), list) else [raw_data.get("data","")]
 
                 for data_point in data_list:
                     seismic_data = {
