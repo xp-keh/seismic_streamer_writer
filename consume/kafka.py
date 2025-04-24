@@ -61,7 +61,7 @@ class AsyncConsumer:
 
                 for data_point in data_list:
                     seismic_data = {
-                        "dt": int(str(data_point.get("dt", 0))[:10]),
+                        "dt": data_point.get("dt", "null"),
                         "network": data_point.get("network", "unknown"),
                         "station": data_point.get("station", "unknown"),
                         "channel": data_point.get("channel", "unknown"),
