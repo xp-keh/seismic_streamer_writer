@@ -36,21 +36,45 @@ class AsyncConsumer:
             async for message in self.consumer:
                 raw_data = message.value
 
-                seismic_data = {
-                    "dt": int(str(raw_data.get("dt", 0))[:10]),
-                    "network": raw_data.get("network", "unknown"),
-                    "station": raw_data.get("station", "unknown"),
-                    "channel": raw_data.get("channel", "unknown"),
-                    "data": raw_data.get("data", 0.0)
-                }
+                # seismic_data = {
+                #     "dt": int(str(raw_data.get("dt", 0))[:10]),
+                #     "network": raw_data.get("network", "unknown"),
+                #     "station": raw_data.get("station", "unknown"),
+                #     "channel": raw_data.get("channel", "unknown"),
+                #     "data": raw_data.get("data", 0.0)
+                # }
 
-                key = f"seismic:{seismic_data['dt']}_{seismic_data['station']}_{seismic_data['channel']}"
+                # key = f"seismic:{seismic_data['dt']}_{seismic_data['station']}_{seismic_data['channel']}"
 
-                await save_seismic_data(key, seismic_data)
-                try:
-                    await self.websocket_manager.broadcast(json.dumps(seismic_data))
-                except WebSocketDisconnect:
-                    self.logger.warning("WebSocket disconnected. Skipping message broadcast.")
+                # await save_seismic_data(key, seismic_data)
+                # try:
+                #     await self.websocket_manager.broadcast(json.dumps(seismic_data))
+                # except WebSocketDisconnect:
+                #     self.logger.warning("WebSocket disconnected. Skipping message broadcast.")
+
+                # try:
+                #     await self.consumer.commit()
+                # except Exception as e:
+                #     self.logger.error(f"Error committing Kafka offset: {e}")
+
+                data_list = raw_data if isinstance(raw_data, list) else [raw_data]
+
+                for data_point in data_list:
+                    seismic_data = {
+                        "dt": int(str(data_point.get("dt", 0))[:10]),
+                        "network": data_point.get("network", "unknown"),
+                        "station": data_point.get("station", "unknown"),
+                        "channel": data_point.get("channel", "unknown"),
+                        "data": data_point.get("data", 0.0)
+                    }
+
+                    key = f"seismic:{seismic_data['dt']}_{seismic_data['station']}_{seismic_data['channel']}"
+                    await save_seismic_data(key, seismic_data)
+
+                    try:
+                        await self.websocket_manager.broadcast(json.dumps(seismic_data))
+                    except WebSocketDisconnect:
+                        self.logger.warning("WebSocket disconnected. Skipping message broadcast.")
 
                 try:
                     await self.consumer.commit()
