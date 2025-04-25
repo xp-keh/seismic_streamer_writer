@@ -56,7 +56,7 @@ async def bulk_write_to_clickhouse():
         network String,
         station String,
         channel String,
-        data Float32
+        data Int32
     ) ENGINE = MergeTree()
     ORDER BY (dt, channel)
     """
@@ -68,7 +68,7 @@ async def bulk_write_to_clickhouse():
             row["network"],
             row["station"],
             row["channel"],
-            safe_float(row.get("data", 0.0)),
+            row["data"]
         )
         for row in data
     ]
