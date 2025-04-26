@@ -6,7 +6,7 @@ from datastore.redis_store import save_seismic_data
 from consume.websocket_manager import WebSocketManager
 import traceback
 from starlette.websockets import WebSocketDisconnect
-from station_latlon import STATION_LATLON
+from consume.station_latlon import STATION_LATLON
 
 station_lookup = {station["name"]: {"lat": station["lat"], "lon": station["lon"]} for station in STATION_LATLON}
 
