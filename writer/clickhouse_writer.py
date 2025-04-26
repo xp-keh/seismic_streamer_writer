@@ -53,10 +53,13 @@ async def bulk_write_to_clickhouse():
     create_table_query = f"""
     CREATE TABLE IF NOT EXISTS {table_name} (
         dt String,
+        lat Float32,
+        lon Float32,
         network String,
         station String,
         channel String,
         data Int32
+
     ) ENGINE = MergeTree()
     ORDER BY (dt, channel)
     """
@@ -65,6 +68,8 @@ async def bulk_write_to_clickhouse():
     data_to_insert = [
         (
             row["dt"],
+            row["lat"],
+            row["lon"],
             row["network"],
             row["station"],
             row["channel"],

@@ -6,6 +6,9 @@ from datastore.redis_store import save_seismic_data
 from consume.websocket_manager import WebSocketManager
 import traceback
 from starlette.websockets import WebSocketDisconnect
+from station_latlon import STATION_LATLON
+
+station_lookup = {station["name"]: {"lat": station["lat"], "lon": station["lon"]} for station in STATION_LATLON}
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -46,6 +49,14 @@ class AsyncConsumer:
                         "channel": data_point.get("channel", "unknown"),
                         "data": data_point.get("data", 0)
                     }
+
+                    station_info = station_lookup.get(seismic_data["station"])
+                    if station_info:
+                        seismic_data["lat"] = station_info["lat"]
+                        seismic_data["lon"] = station_info["lon"]
+                    else:
+                        seismic_data["lat"] = None
+                        seismic_data["lon"] = None
 
                     self.logger.info("Processed seismic data: %s", json.dumps(seismic_data))
 
