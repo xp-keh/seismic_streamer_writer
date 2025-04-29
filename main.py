@@ -3,7 +3,7 @@ import logging
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, WebSocket
 from consume.websocket_manager import WebSocketManager
-from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.triggers.cron import CronTrigger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from consume.kafka import AsyncConsumer
 from config.utils import get_env_value
@@ -49,7 +49,7 @@ async def startup_event():
 
     scheduler.add_job(
         async_bulk_write_to_clickhouse,
-        trigger=IntervalTrigger(minutes=1),
+        trigger=CronTrigger(minute=0),
         id="clickhouse_upload",
         replace_existing=True
     )
