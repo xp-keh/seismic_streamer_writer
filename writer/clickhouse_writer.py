@@ -47,7 +47,7 @@ async def bulk_write_to_clickhouse():
         logging.info("No new data to write to ClickHouse.")
         return
 
-    timestamp_str = datetime.now().strftime("%Y%m%d_%H%M")
+    timestamp_str = datetime.now(gmt7).strftime("%Y%m%d_%H%M")
     table_name = f"seismic_{timestamp_str}"
 
     create_table_query = f"""
