@@ -79,7 +79,7 @@ async def bulk_write_to_clickhouse():
     ]
 
     utc_now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT+0")
-    logging.info(f"Uploading {len(data)} records to ClickHouse at {utc_now}")
+    logging.info(f"Uploading {len(data)} records to ClickHouse at {utc_now} with name {table_name}")
 
     clickhouse_client.insert(table_name, data_to_insert)
 
