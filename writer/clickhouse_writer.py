@@ -1,7 +1,7 @@
 import logging
 import clickhouse_connect
 import pytz
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from config.utils import get_env_value
 from datastore.redis_store import get_all_seismic_data, clear_redis
 
@@ -47,7 +47,9 @@ async def bulk_write_to_clickhouse():
         logging.info("No new data to write to ClickHouse.")
         return
 
-    timestamp_str = datetime.now().strftime("%Y%m%d_%H")
+    previous_hour = datetime.now() - timedelta(hours=1)
+    timestamp_str = previous_hour.strftime("%Y%m%d_%H")
+    # timestamp_str = datetime.now().strftime("%Y%m%d_%H")
     table_name = f"seismic_{timestamp_str}"
 
     create_table_query = f"""
