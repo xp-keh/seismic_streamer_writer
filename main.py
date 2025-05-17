@@ -9,6 +9,8 @@ from consume.kafka import AsyncConsumer
 from config.utils import get_env_value
 from datastore.redis_store import init_redis
 from writer.clickhouse_writer import bulk_write_to_clickhouse
+from fastapi import Query
+from service.fdsn_fetch import fetch_seismic_data
 
 kafka_broker = get_env_value("KAFKA_BROKER")
 kafka_consume_topic = get_env_value("KAFKA_CONSUME_TOPIC")
@@ -39,6 +41,15 @@ async def websocket_endpoint(websocket: WebSocket):
 async def async_bulk_write_to_clickhouse():
     """Async function to bulk write to ClickHouse."""
     await bulk_write_to_clickhouse()
+
+@app.get("/fdsn-data")
+async def get_fdsn_data(station: str = Query(..., description="Station code to fetch data for")):
+    """
+    Fetch recent seismic waveform data from FDSN for the specified station.
+    """
+    result = fetch_seismic_data(station)
+    logging.info("Successfully fetched data for " + station)
+    return result
 
 @app.on_event("startup")
 async def startup_event():
