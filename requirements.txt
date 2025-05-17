@@ -11,3 +11,4 @@ clickhouse-connect
 websockets
 orjson
 uvloop
+obspy
