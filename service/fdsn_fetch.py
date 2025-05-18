@@ -7,7 +7,7 @@ from obspy.clients.fdsn import Client
 
 STATIONS = ["PMBI"]
 CHANNELS = ["BHZ", "BHN", "BHE"]
-DATA_LENGTH = 300
+DATA_LENGTH = 600
 FDSN_URL = "GEOFON"
 
 client = Client(base_url=FDSN_URL)
@@ -16,8 +16,8 @@ def get_time_window():
     now = datetime.now(timezone.utc)
     floored_minute = (now.minute // 5) * 5
     now_floored = now.replace(minute=floored_minute, second=0, microsecond=0)
-    end_time = UTCDateTime(now_floored - timedelta(minutes=25))
-    start_time = UTCDateTime(now_floored - timedelta(minutes=30))
+    end_time = UTCDateTime(now_floored)
+    start_time = UTCDateTime(now_floored - timedelta(minutes=10))
     return start_time, end_time
 
 def fetch_seismic_data(station_code):
