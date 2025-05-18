@@ -7,7 +7,7 @@ from obspy.clients.fdsn import Client
 
 STATIONS = ["PMBI"]
 CHANNELS = ["BHZ", "BHN", "BHE"]
-DATA_LENGTH = 600
+DATA_LENGTH = 12000
 FDSN_URL = "GEOFON"
 
 client = Client(base_url=FDSN_URL)
