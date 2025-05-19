@@ -25,7 +25,7 @@ def get_time_window():
     now = datetime.now(timezone.utc)
     floored_minute = (now.minute // 5) * 5
     now_floored = now.replace(minute=floored_minute, second=0, microsecond=0)
-    end_time = UTCDateTime(now_floored - timedelta(minutes=80))
+    end_time = UTCDateTime(now_floored - timedelta(minutes=30))
     start_time = UTCDateTime(now_floored - timedelta(minutes=20))
     return start_time, end_time
 
