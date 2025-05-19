@@ -69,7 +69,7 @@ async def bulk_write_to_clickhouse():
         logging.error(f"❌ Failed to connect to ClickHouse: {e}")
         return
 
-    previous_hour = datetime.now(timezone.utc) - timedelta(minutes=30)
+    previous_hour = datetime.now(timezone.utc) - timedelta(hours=1)
     timestamp_str = previous_hour.strftime("%Y%m%d")
 
     total_inserted = 0
@@ -88,7 +88,7 @@ async def bulk_write_to_clickhouse():
             logging.warning(f"⚠️ No data returned for station: {station}")
             continue
 
-        table_name = f"weather_{station}_{timestamp_str}"
+        table_name = f"seismic_{station}_{timestamp_str}"
 
         create_table_query = f"""
         CREATE TABLE IF NOT EXISTS {table_name} (
