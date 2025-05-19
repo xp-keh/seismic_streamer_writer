@@ -69,8 +69,8 @@ async def bulk_write_to_clickhouse():
         logging.error(f"❌ Failed to connect to ClickHouse: {e}")
         return
 
-    previous_hour = datetime.now() - timedelta(hours=1)
-    timestamp_str = previous_hour.strftime("%Y%m%d_%H")
+    previous_hour = datetime.now(timezone.utc) - timedelta(minutes=30)
+    timestamp_str = previous_hour.strftime("%Y%m%d")
 
     total_inserted = 0
 
