@@ -12,3 +12,4 @@ websockets
 orjson
 uvloop
 obspy
+httpx
