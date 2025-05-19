@@ -2,7 +2,7 @@ import json
 import logging
 from aiokafka import AIOKafkaConsumer
 from config.logging import Logger
-from datastore.redis_store import save_seismic_data
+# from datastore.redis_store import save_seismic_data
 from consume.websocket_manager import WebSocketManager
 import traceback
 from starlette.websockets import WebSocketDisconnect
@@ -58,10 +58,8 @@ class AsyncConsumer:
                         seismic_data["lat"] = None
                         seismic_data["lon"] = None
 
-                    # self.logger.info("Processed seismic data: %s", json.dumps(seismic_data))
-
-                    key = f"seismic:{seismic_data['dt']}_{seismic_data['station']}_{seismic_data['channel']}"
-                    await save_seismic_data(key, seismic_data)
+                    # key = f"seismic:{seismic_data['dt']}_{seismic_data['station']}_{seismic_data['channel']}"
+                    # await save_seismic_data(key, seismic_data)
 
                     try:
                         await self.websocket_manager.broadcast(json.dumps(seismic_data))

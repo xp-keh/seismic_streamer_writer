@@ -1,9 +1,12 @@
 import logging
 import clickhouse_connect
 import pytz
+import httpx
 from datetime import datetime, timezone, timedelta
 from config.utils import get_env_value
-from datastore.redis_store import get_all_seismic_data, clear_redis
+# from datastore.redis_store import get_all_seismic_data, clear_redis
+from service.fdsn_fetch import fetch_station_tabular_data
+from consume.station_latlon import STATION_LATLON
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -13,6 +16,31 @@ CLICKHOUSE_USER = get_env_value("CLICKHOUSE_USER")
 CLICKHOUSE_PASSWORD = get_env_value("CLICKHOUSE_PASSWORD")
 
 gmt7 = pytz.timezone("Asia/Jakarta")
+
+locations = {entry["name"]: (entry["lat"], entry["lon"]) for entry in STATION_LATLON}
+
+async def register_table_api(table_name, location, timestamp_str):
+    url = "http://xp-keh:4000/catalog/register"
+    data = {
+        "table_name": table_name,
+        "data_type": "seismic",
+        "station": location,
+        "date": timestamp_str,
+        "latitude": locations.get(location, ("unknown", "unknown"))[0],
+        "longitude": locations.get(location, ("unknown", "unknown"))[1],
+    }
+    logging.info(f"Sending registration request to {url} with JSON payload: {data}")
+
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(url, json=data)
+            if response.status_code in (200, 201):
+                logging.info(f"Registered table for {table_name} successfully")
+            else:
+                logging.error(f"Failed to register table for location {location}. Status: {response.status_code}")
+        except Exception as e:
+            logging.error(f"Exception registering table for location {location}: {e}")
 
 def format_unix_to_gmt7_string(unix_ts):
     try:
@@ -38,54 +66,78 @@ async def bulk_write_to_clickhouse():
             database=CLICKHOUSE_DATABASE
         )
     except Exception as e:
-        logging.error(f"Failed to connect to ClickHouse: {e}")
-        return
-
-    data = await get_all_seismic_data()
-    
-    if not data:
-        logging.info("No new data to write to ClickHouse.")
+        logging.error(f"❌ Failed to connect to ClickHouse: {e}")
         return
 
     previous_hour = datetime.now() - timedelta(hours=1)
     timestamp_str = previous_hour.strftime("%Y%m%d_%H")
-    # timestamp_str = datetime.now().strftime("%Y%m%d_%H")
-    table_name = f"seismic_{timestamp_str}"
 
-    create_table_query = f"""
-    CREATE TABLE IF NOT EXISTS {table_name} (
-        dt String,
-        lat Float32,
-        lon Float32,
-        network String,
-        station String,
-        channel String,
-        data Int32
+    total_inserted = 0
 
-    ) ENGINE = MergeTree()
-    ORDER BY (dt, channel)
-    """
-    clickhouse_client.command(create_table_query)
+    for station_entry in STATION_LATLON:
+        station = station_entry["name"]
+        logging.info(f"📡 Processing station: {station}")
 
-    data_to_insert = [
-        (
-            row["dt"],
-            row["lat"],
-            row["lon"],
-            row["network"],
-            row["station"],
-            row["channel"],
-            row["data"]
-        )
-        for row in data
-    ]
+        try:
+            tabular_data, _ = await fetch_station_tabular_data(station)
+        except Exception as e:
+            logging.error(f"❌ Fetch/transform error for {station}: {e}")
+            continue
 
-    utc_now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT+0")
-    logging.info(f"Uploading {len(data)} records to ClickHouse at {utc_now} with name {table_name}")
+        if not tabular_data:
+            logging.warning(f"⚠️ No data returned for station: {station}")
+            continue
 
-    clickhouse_client.insert(table_name, data_to_insert)
+        table_name = f"weather_{station}_{timestamp_str}"
 
-    await clear_redis()  
-    logging.info(f"Uploaded {len(data)} records to ClickHouse and cleared Redis.")
+        create_table_query = f"""
+        CREATE TABLE IF NOT EXISTS {table_name} (
+            dt String,
+            lat Float32,
+            lon Float32,
+            network String,
+            station String,
+            channel String,
+            data Int32
+        ) ENGINE = MergeTree()
+        ORDER BY (dt, channel)
+        """
+
+        try:
+            clickhouse_client.command(create_table_query)
+        except Exception as e:
+            logging.error(f"❌ Failed to create table {table_name}: {e}")
+            continue
+
+        data_to_insert = [
+            (
+                row["dt"],
+                row["lat"],
+                row["lon"],
+                row["network"],
+                row["station"],
+                row["channel"],
+                row["data"]
+            )
+            for row in tabular_data
+        ]
+
+        try:
+            clickhouse_client.insert(table_name, data_to_insert)
+            logging.info(f"✅ Inserted {len(data_to_insert)} records into {table_name}")
+            total_inserted += len(data_to_insert)
+        except Exception as e:
+            logging.error(f"❌ Insert failed for {station} into {table_name}: {e}")
+            continue
+
+        try:
+            await register_table_api(table_name, station, timestamp_str)
+        except Exception as e:
+            logging.error(f"❌ Failed to register table {table_name} for {station}: {e}")
+
+    if total_inserted > 0:
+        logging.info(f"📦 Finished uploading total {total_inserted} records to ClickHouse.")
+    else:
+        logging.info("⚠️ No records were inserted to ClickHouse.")
 
     clickhouse_client.close()
