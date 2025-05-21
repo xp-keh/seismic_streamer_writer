@@ -4,7 +4,6 @@ import pytz
 import httpx
 from datetime import datetime, timezone, timedelta
 from config.utils import get_env_value
-# from datastore.redis_store import get_all_seismic_data, clear_redis
 from service.fdsn_fetch import fetch_station_tabular_data
 from consume.station_latlon import STATION_LATLON
 

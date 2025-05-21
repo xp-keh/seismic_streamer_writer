@@ -10,9 +10,6 @@ services:
       - KAFKA_CONSUME_TOPIC=${KAFKA_CONSUME_TOPIC}
       - KAFKA_ZOOKEEPER_CONNECT=${KAFKA_ZOOKEEPER_CONNECT}
       - KAFKA_CONSUMER_GROUP=${KAFKA_CONSUMER_GROUP}
-      # - REDIS_HOST=${REDIS_HOST}
-      # - REDIS_PORT=${REDIS_PORT}
-      # - REDIS_DB=${REDIS_DB}
       - CLICKHOUSE_HOST=${CLICKHOUSE_HOST}
       - CLICKHOUSE_DATABASE=${CLICKHOUSE_DATABASE}
       - CLICKHOUSE_USER=${CLICKHOUSE_USER}
@@ -23,24 +20,6 @@ services:
     networks:
       data-station-network:
         ipv4_address: 172.20.14.96
-    # depends_on:
-    #   - redis
-
-  # redis:
-  #   image: redis:alpine
-  #   container_name: seismic_redis
-  #   restart: always
-  #   command: redis-server --port 6384 --save 60 1 --loglevel warning --appendonly yes
-  #   volumes:
-  #     - redis_data:/data
-  #   ports:
-  #     - "6384:6384"
-  #   networks:
-  #     data-station-network:
-  #       ipv4_address: 172.20.14.97
-
-# volumes:
-#   redis_data:
 
 networks:
   data-station-network:

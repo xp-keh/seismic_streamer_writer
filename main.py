@@ -7,7 +7,6 @@ from apscheduler.triggers.cron import CronTrigger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from consume.kafka import AsyncConsumer
 from config.utils import get_env_value
-# from datastore.redis_store import init_redis
 from writer.clickhouse_writer import bulk_write_to_clickhouse
 from fastapi import Query
 
@@ -41,25 +40,14 @@ async def async_bulk_write_to_clickhouse():
     """Async function to bulk write to ClickHouse."""
     await bulk_write_to_clickhouse()
 
-# @app.get("/fdsn-data")
-# async def get_fdsn_data(station: str = Query(..., description="Station code to fetch data for")):
-#     """
-#     Fetch recent seismic waveform data from FDSN for the specified station.
-#     """
-#     result = fetch_seismic_data(station)
-#     logging.info("Successfully fetched data for " + station)
-#     return result
-
 @app.on_event("startup")
 async def startup_event():
     """Start Kafka consumer and schedule ClickHouse uploads on FastAPI startup."""
-    # await init_redis()
     await consumer.start()
     asyncio.create_task(consumer.consume()) 
 
     scheduler.add_job(
         async_bulk_write_to_clickhouse,
-        # trigger=CronTrigger(minute=20),
         trigger = CronTrigger(minute="0,10,20,30,40,50"),
         id="clickhouse_upload",
         replace_existing=True
