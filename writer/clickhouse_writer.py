@@ -92,7 +92,9 @@ async def bulk_write_to_clickhouse():
 
         create_table_query = f"""
         CREATE TABLE IF NOT EXISTS {table_name} (
-            dt String,
+            dt Int32,
+            dt_format Int32,
+            timestamp String,
             lat Float32,
             lon Float32,
             network String,
@@ -112,6 +114,8 @@ async def bulk_write_to_clickhouse():
         data_to_insert = [
             (
                 row["dt"],
+                row["dt_format"],
+                row["timestamp"],
                 row["lat"],
                 row["lon"],
                 row["network"],

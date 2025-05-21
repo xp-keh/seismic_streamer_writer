@@ -92,9 +92,14 @@ def _transform_to_tabular(station, chans, start_time):
         sr = info["sampling_rate"]
         interval = 1.0 / sr
         for i, val in enumerate(samples):
-            timestamp = (start_time + timedelta(seconds=i * interval)).isoformat()
+            dt_object = start_time + timedelta(seconds=i * interval)
+            dt_unix_ms = int(dt_object.timestamp * 1000)
+            dt_format = str(dt_unix_ms)[:10]
+            timestamp = dt_object.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
             output.append({
-                "dt": timestamp,
+                "dt": dt_unix_ms,
+                "dt_format": dt_format,
+                "timestamp": timestamp,
                 "lat": latlon["lat"],
                 "lon": latlon["lon"],
                 "network": "GE",
