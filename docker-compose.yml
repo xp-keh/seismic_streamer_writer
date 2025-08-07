@@ -19,7 +19,7 @@ services:
       - "8014:8014"
     networks:
       nginx-manager_customnetwork:
-        ipv4_address: 172.20.0.133
+        ipv4_address: 172.20.0.134
 
 networks:
   nginx-manager_customnetwork:
