@@ -59,7 +59,7 @@ class AsyncConsumer:
 
                     try:
                         await self.websocket_manager.broadcast(json.dumps(seismic_data))
-                        self.logger.info(f"Data sent to WebSocket: {seismic_data}")
+                        # self.logger.info(f"Data sent to WebSocket: {seismic_data}")
                     except WebSocketDisconnect:
                         self.logger.warning("WebSocket disconnected. Skipping message broadcast.")
 

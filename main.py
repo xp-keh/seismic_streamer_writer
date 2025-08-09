@@ -48,7 +48,7 @@ async def startup_event():
 
     scheduler.add_job(
         async_bulk_write_to_clickhouse,
-        trigger = CronTrigger(minute="0,10,20,30,40,50"),
+        trigger = CronTrigger(minute="0,10,15,18,20,30,40,50"),
         id="clickhouse_upload",
         replace_existing=True
     )
