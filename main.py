@@ -23,7 +23,7 @@ consumer = AsyncConsumer(kafka_broker, kafka_consume_topic, kafka_consumer_group
 scheduler = AsyncIOScheduler()
 scheduler.start()
 
-@app.websocket("/ws-seismic")
+@app.websocket("/")
 async def websocket_endpoint(websocket: WebSocket):
     """WebSocket endpoint for real-time streaming."""
     await websocket_manager.connect(websocket)
